@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sripada Maharaj Rooms</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .logo {
+            width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #FF7043;
+        }
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        form input, form select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #FF7043;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #F4511E;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .button-container button {
+            width: 48%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #FF7043;
+            color: white;
+        }
+        .conditional-input {
+            display: none;
+        }
+        #payments {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        #loginPage, #bookingPage {
+            display: none;
+        }
+        #photoCapture {
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+        }
+        #video {
+            margin-top: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        #canvas {
+            display: none;
+        }
+        #payments img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+        #logoutButton {
+            width: auto;
+            float: right;
+            margin-bottom: 20px;
+        }
+        .datetime-group {
+            display: flex;
+            gap: 20px;
+        }
+        .datetime-group > div {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginPage" class="container">
+        <img src="SRIPADA MAHARAJ ROOMS LOGO" alt="Sripada Maharaj Rooms Logo" class="logo">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+
+            <button type="button" onclick="loginUser()">Login</button>
+        </form>
+    </div>
+
+    <div id="bookingPage" class="container">
+        <img src="/api/placeholder/200/200" alt="Sripada Maharaj Rooms Logo" class="logo">
+        <h1>Sripada Maharaj Rooms</h1>
+        <button id="logoutButton" onclick="logoutUser()">Logout</button>
+        <form id="bookingForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" required pattern="\d{10}">
+
+            <div class="datetime-group">
+                <div>
+                    <label for="arrivalDate">Arrival Date:</label>
+                    <input type="date" id="arrivalDate" required>
+                </div>
+                <div>
+                    <label for="arrivalTime">Arrival Time:</label>
+                    <input type="time" id="arrivalTime" required>
+                </div>
+            </div>
+
+            <div class="datetime-group">
+                <div>
+                    <label for="departureDate">Departure Date:</label>
+                    <input type="date" id="departureDate" required>
+                </div>
+                <div>
+                    <label for="departureTime">Departure Time:</label>
+                    <input type="time" id="departureTime" required>
+                </div>
+            </div>
+
+            <label for="days">Number of Days:</label>
+            <input type="number" id="days" required min="1">
+
+            <label for="noOfRooms">Number of Rooms:</label>
+            <input type="number" id="noOfRooms" required min="1">
+
+            <label for="totalCharges">Total Charges (Final Amount):</label>
+            <input type="number" id="totalCharges" required min="1">
+
+            <label for="roomType">Room Type:</label>
+            <select id="roomType" required>
+                <option value="" disabled selected>Select room type</option>
+                <option value="ac">A/C</option>
+                <option value="non-ac">Non-A/C</option>
+            </select>
+
+            <label for="paymentMethod">Payment Method:</label>
+            <select id="paymentMethod" required>
+                <option value="" disabled selected>Select payment method</option>
+                <option value="GPay">GPay</option>
+                <option value="PhonePe">PhonePe</option>
+                <option value="Cash">Cash</option>
+            </select>
+
+            <label for="paymentType">Payment Type:</label>
+            <select id="paymentType" onchange="updatePaymentType()" required>
+                <option value="" disabled selected>Select payment type</option>
+                <option value="Full Payment">Full Payment</option>
+                <option value="Advance">Advance</option>
+                <option value="Remaining Advance">Remaining Advance</option>
+            </select>
+
+            <div id="advanceFields" class="conditional-input">
+                <label for="advanceAmountNow">Advance Amount Being Paid Now:</label>
+                <input type="number" id="advanceAmountNow" min="0">
+
+                <label for="remainingAmount">Remaining Amount Left:</label>
+                <input type="number" id="remainingAmount" min="0">
+            </div>
+
+            <div id="remainingAdvanceFields" class="conditional-input">
+                <label for="advanceAlreadyPaid">Advance Amount Already Paid:</label>
+                <input type="number" id="advanceAlreadyPaid" min="0">
+
+                <label for="remainingBeingPaid">Remaining Amount Being Paid:</label>
+                <input type="number" id="remainingBeingPaid" min="0">
+            </div>
+
+            <label for="paymentStatus">Payment Status:</label>
+            <select id="paymentStatus" required>
+                <option value="" disabled selected>Select status</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+            </select>
+
+            <button type="button" onclick="submitPaymentAndDownloadInvoice()">Submit Payment & Download PDF</button>
+        </form>
+
+        <label for="customerDetails">Customer Details:</label>
+        <select id="customerDetails" onchange="showCustomerDetails()">
+            <option value="" disabled selected>Select an option</option>
+            <option value="aadhar">Aadhar Number</option>
+            <option value="takePhoto">Take Photo</option>
+        </select>
+
+        <div id="aadharInput" class="conditional-input">
+            <label for="aadharNumber">Enter Aadhar Number:</label>
+            <input type="text" id="aadharNumber" maxlength="12" pattern="\d{12}">
+        </div>
+
+        <div id="photoCapture" class="conditional-input">
+            <video id="video" width="300" height="200" autoplay></video>
+            <canvas id="canvas"></canvas>
+            <button type="button" onclick="capturePhoto()">Capture Photo</button>
+        </div>
+
+        <div id="payments"></div>
+
+        <div class="button-container">
+            <button type="button" onclick="showPayments()">Show Previous Payments</button>
+            <button type="button" onclick="clearPayments()">Clear Payment History</button>
+        </div>
+        <div class="button-container">
+            <button type="button" onclick="downloadPaymentHistory()">Download Payment History (PDF)</button>
+        </div>
+    </div>
+
+    <script>
+        const users = [
+            { username: "manager", password: "bujji180", role: "manager" },
+            { username: "owner", password: "karthik@1979", role: "owner" }
+        ];
+
+        let payments = JSON.parse(localStorage.getItem('payments')) || [];
+        let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser')) || null;
+        let photoDataUrl = null;
+
+        window.onload = function() {
+            updateUI();
+        };
+
+        function updateUI() {
+            document.getElementById("loginPage").style.display = loggedInUser ? "none" : "block";
+            document.getElementById("bookingPage").style.display = loggedInUser ? "block" : "none";
+        }
+
+        function updatePaymentType() {
+            const paymentType = document.getElementById("paymentType").value;
+            document.getElementById("advanceFields").style.display = 
+                paymentType === "Advance" ? "block" : "none";
+            document.getElementById("remainingAdvanceFields").style.display = 
+                paymentType === "Remaining Advance" ? "block" : "none";
+        }
+
+        function loginUser() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                loggedInUser = user;
+                localStorage.setItem('loggedInUser', JSON.stringify(user));
+                updateUI();
+            } else {
+                alert("Invalid username or password");
+            }
+        }
+
+        function logoutUser() {
+            loggedInUser = null;
+            localStorage.removeItem('loggedInUser');
+            updateUI();
+        }
+
+        function showCustomerDetails() {
+            const customerDetails = document.getElementById("customerDetails").value;
+            if (customerDetails === "aadhar") {
+                stopCamera();
+                document.getElementById("aadharInput").style.display = "block";
+                document.getElementById("photoCapture").style.display = "none";
+            } else if (customerDetails === "takePhoto") {
+                document.getElementById("photoCapture").style.display = "block";
+                document.getElementById("aadharInput").style.display = "none";
+                startCamera();
+            }
+        }
+
+        function startCamera() {
+            const video = document.getElementById("video");
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                })
+                .catch(err => console.error("Error accessing camera:", err));
+        }
+
+        function stopCamera() {
+            const video = document.getElementById('video');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            photoDataUrl = canvas.toDataURL('image/png');
+            stopCamera();
+        }
+
+        function submitPaymentAndDownloadInvoice() {
+            const formData = {
+                name: document.getElementById("name").value,
+                phone: document.getElementById("phone").value,
+                arrivalDate: document.getElementById("arrivalDate").value,
+                arrivalTime: document.getElementById("arrivalTime").value,
+                departureDate: document.getElementById("departureDate").value,
+                departureTime: document.getElementById("departureTime").value,
+                days: document.getElementById("days").value,
+                noOfRooms: document.getElementById("noOfRooms").value,
+                totalCharges: document.getElementById("totalCharges").value,
+                roomType: document.getElementById("roomType").value,
+                paymentMethod: document.getElementById("paymentMethod").value,
+                paymentType: document.getElementById("paymentType").value,
+                paymentStatus: document.getElementById("paymentStatus").value,
+                advanceAmountNow: document.getElementById("advanceAmountNow").value || "0",
+                remainingAmount: document.getElementById("remainingAmount").value || "0",
+                advanceAlreadyPaid: document.getElementById("advanceAlreadyPaid").value || "0",
+                remainingBeingPaid: document.getElementById("remainingBeingPaid").value || "0",
+                aadharNumber: document.getElementById("aadharNumber").value,
+                photo: photoDataUrl,
+                date: new Date().toLocaleString()
+            };
+
+            payments.push(formData);
+            localStorage.setItem('payments', JSON.stringify(payments));
+            downloadInvoice(formData);
+            showPayments();
+        }
+
+        function downloadInvoice(payment) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add logo
+            doc.addImage("/api/placeholder/200/200", 'JPEG', 10, 10, 40, 40);
+            
+            doc.setFontSize(20);
+            doc.text("Sripada Maharaj Rooms - Invoice", 60, 30);
+            
+            doc.setFontSize(12);
+            doc.text(`Date: ${payment.date}`, 20, 60);
+
+            const content = [
+                ["Name:", payment.name],
+                ["Phone:", payment.phone],
+                ["Arrival:", `${payment.arrivalDate} ${payment.arrivalTime}`],
+                ["Departure:", `${payment.departureDate} ${payment.departureTime}`],
+                ["Days:", payment.days],
+                ["Rooms:", payment.noOfRooms],
+                ["Room Type:", payment.roomType],
+                ["Total Amount:", `₹${payment.totalCharges}`],
+                ["Payment Method:", payment.paymentMethod],["Payment Type:", payment.paymentType],
+                ["Payment Status:", payment.paymentStatus]
+            ];
+
+            if (payment.paymentType === "Advance") {
+                content.push(
+                    ["Advance Paid:", `₹${payment.advanceAmountNow}`],
+                    ["Remaining:", `₹${payment.remainingAmount}`]
+                );
+            } else if (payment.paymentType === "Remaining Advance") {
+                content.push(
+                    ["Previously Paid:", `₹${payment.advanceAlreadyPaid}`],
+                    ["Paid Now:", `₹${payment.remainingBeingPaid}`]
+                );
+            }
+
+            doc.autoTable({
+                body: content,
+                startY: 70,
+                theme: 'grid',
+                styles: { fontSize: 10 }
+            });
+
+            if (payment.photo) {
+                doc.addImage(payment.photo, 'PNG', 20, doc.lastAutoTable.finalY + 10, 50, 50);
+            }
+
+            doc.save(`invoice_${payment.name}_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
+        function showPayments() {
+            const container = document.getElementById("payments");
+            container.innerHTML = "<h2>Payment History</h2>";
+            
+            if (payments.length === 0) {
+                container.innerHTML += "<p>No payment records found.</p>";
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Arrival</th>
+                    <th>Departure</th>
+                    <th>Days</th>
+                    <th>Rooms</th>
+                    <th>Room Type</th>
+                    <th>Total Amount</th>
+                    <th>Payment Method</th>
+                    <th>Payment Type</th>
+                    <th>Payment Status</th>
+                    <th>Advance Paid</th>
+                    <th>Remaining</th>
+                    <th>Previously Paid</th>
+                    <th>Paid Now</th>
+                    <th>Photo</th>
+                </tr>
+            `;
+
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.date}</td>
+                    <td>${payment.name}</td>
+                    <td>${payment.phone}</td>
+                    <td>${payment.arrivalDate} ${payment.arrivalTime}</td>
+                    <td>${payment.departureDate} ${payment.departureTime}</td>
+                    <td>${payment.days}</td>
+                    <td>${payment.noOfRooms}</td>
+                    <td>${payment.roomType}</td>
+                    <td>₹${payment.totalCharges}</td>
+                    <td>${payment.paymentMethod}</td>
+                    <td>${payment.paymentType}</td>
+                    <td>${payment.paymentStatus}</td>
+                    <td>₹${payment.advanceAmountNow || '0'}</td>
+                    <td>₹${payment.remainingAmount || '0'}</td>
+                    <td>₹${payment.advanceAlreadyPaid || '0'}</td>
+                    <td>₹${payment.remainingBeingPaid || '0'}</td>
+                    <td>${payment.photo ? `<img src="${payment.photo}" alt="Customer Photo">` : 'No Photo'}</td>
+                `;
+                table.appendChild(row);
+            });
+
+            container.appendChild(table);
+        }
+
+        function clearPayments() {
+            if (confirm("Are you sure you want to clear all payment history?")) {
+                payments = [];
+                localStorage.setItem('payments', JSON.stringify(payments));
+                showPayments();
+            }
+        }
+
+        function downloadPaymentHistory() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            // Add logo
+            doc.addImage("/api/placeholder/200/200", 'JPEG', 14, 10, 30, 30);
+
+            doc.setFontSize(20);
+            doc.text("Sripada Maharaj Rooms - Payment History", 50, 25);
+            doc.setFontSize(12);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 40);
+
+            const headers = [
+                ["Date", "Name", "Phone", "Arrival", "Departure", "Days", "Rooms", 
+                 "Type", "Total", "Method", "Pay Type", "Status", "Advance", 
+                 "Remaining", "Prev Paid", "Paid Now"]
+            ];
+
+            const data = payments.map(payment => [
+                payment.date,
+                payment.name,
+                payment.phone,
+                `${payment.arrivalDate} ${payment.arrivalTime}`,
+                `${payment.departureDate} ${payment.departureTime}`,
+                payment.days,
+                payment.noOfRooms,
+                payment.roomType,
+                `₹${payment.totalCharges}`,
+                payment.paymentMethod,
+                payment.paymentType,
+                payment.paymentStatus,
+                `₹${payment.advanceAmountNow || '0'}`,
+                `₹${payment.remainingAmount || '0'}`,
+                `₹${payment.advanceAlreadyPaid || '0'}`,
+                `₹${payment.remainingBeingPaid || '0'}`
+            ]);
+
+            doc.autoTable({
+                head: headers,
+                body: data,
+                startY: 45,
+                styles: { fontSize: 7, cellPadding: 2 },
+                columnStyles: {
+                    0: { cellWidth: 25 },
+                    1: { cellWidth: 20 },
+                    2: { cellWidth: 20 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 25 },
+                    5: { cellWidth: 12 },
+                    6: { cellWidth: 12 },
+                    7: { cellWidth: 15 },
+                    8: { cellWidth: 15 },
+                    9: { cellWidth: 15 },
+                    10: { cellWidth: 15 },
+                    11: { cellWidth: 15 },
+                    12: { cellWidth: 15 },
+                    13: { cellWidth: 15 },
+                    14: { cellWidth: 15 },
+                    15: { cellWidth: 15 }
+                }
+            });
+
+            doc.save('payment_history.pdf');
+        }
+
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+            showPayments();
+        });
+    </script>
+</body>
+</html>
